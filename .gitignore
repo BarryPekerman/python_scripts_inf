@@ -1,0 +1,22 @@
+#Ignore all
+*
+
+#Not me
+!.gitignore
+
+#not the build/dummy.md
+!build/dummy.md
+
+#main dir
+!README.md
+!package.sh
+!trust-policy.json
+
+#scripts
+!scripts/
+
+#wikipedia
+!scripts/wikipedia
+!scripts/wikipedia/requirements.txt
+!scripts/wikipedia/wikipedia_script.py
+
