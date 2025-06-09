@@ -1,34 +1,35 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-if [ -z "$1" ]; then
-  echo "Usage: ./package.sh <script_name> (e.g., wikipedia)"
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <script_name>"
   exit 1
 fi
 
-SCRIPT_NAME=$1
-SCRIPT_DIR="scripts/$SCRIPT_NAME"
+SCRIPT_NAME="$1"
 HANDLER_FILE="${SCRIPT_NAME}_script.py"
+SCRIPT_DIR="scripts/${SCRIPT_NAME}"
+BUILD_DIR="build/function"
+ZIP_FILE="${SCRIPT_NAME}.zip"
 
-if [ ! -f "$SCRIPT_DIR/$HANDLER_FILE" ]; then
-  echo "Error: $HANDLER_FILE not found in $SCRIPT_DIR"
+# sanity checks
+if [ ! -f "${SCRIPT_DIR}/${HANDLER_FILE}" ]; then
+  echo "ERROR: Cannot find ${SCRIPT_DIR}/${HANDLER_FILE}"
   exit 1
 fi
 
-echo "[*] Cleaning previous build..."
-mkdir -p build
+# clean & prepare
+rm -rf "${BUILD_DIR}" "${ZIP_FILE}"
+mkdir -p "${BUILD_DIR}"
 
-echo "[*] Installing dependencies for $SCRIPT_NAME..."
-pip install --target build -r "$SCRIPT_DIR/requirements.txt"
+# copy handler
+cp "${SCRIPT_DIR}/${HANDLER_FILE}" "${BUILD_DIR}/"
 
-echo "[*] Copying handler..."
-cp "$SCRIPT_DIR/$HANDLER_FILE" "build/"
+# zip
+(
+  cd "${BUILD_DIR}"
+  zip -r9 "../../${ZIP_FILE}" .
+)
 
-echo "[*] Zipping package..."
-cd build
-zip -r9 ../${SCRIPT_NAME}.zip .
-cd ..
-
-echo "[✓] Packaged $SCRIPT_NAME to ${SCRIPT_NAM}.zip"
-echo "Lambda handler should be set to: ${SCRIPT_NAME}_script.lambda_handler"
+echo "[✓] Packaged function → ${ZIP_FILE}"
 
